@@ -64,7 +64,7 @@ $Body = @{
 } | ConvertTo-Json
 
 if (-not ([string]::IsNullOrEmpty($text))){
-Invoke-RestMethod -ContentType 'application/json' -Uri $hookurl  -Method Post -Body ($Body | ConvertTo-Json)};
+Invoke-RestMethod -ContentType 'application/json' -Uri $hookurl -Method Post -Body ($Body | ConvertTo-Json)};
 
 if (-not ([string]::IsNullOrEmpty($file))){curl.exe -F "file1=@$file" $hookurl}
 }
