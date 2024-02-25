@@ -54,6 +54,8 @@ param (
     [string]$text 
 )
 
+$username = Get-Random -Minimum 10000 -Maximum 99999
+
 $hookurl = "$dc"
 
 $Body = @{
