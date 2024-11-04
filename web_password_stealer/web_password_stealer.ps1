@@ -1,4 +1,4 @@
-$hookurl="$dc"
+$hookurl="https://discord.com/api/webhooks/1213792320122523688/lIBOlPzfAcQVLmZIkYbvuxwJeviZWCQIz-CcF4Ep4ENGwwg3BmZgu0x0N68OOR_tZ4Vy"
 function Send-Discord {
     [CmdletBinding()]
     param(
