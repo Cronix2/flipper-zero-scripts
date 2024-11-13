@@ -39,7 +39,7 @@ try {
     $decryptedKeyBase64 = [Convert]::ToBase64String($decryptedKey)
 }
 catch {
-    Write-Output "Erreur lors du déchiffrement de la clé : $_"
+    Write-Output "Erreur lors du déchiffrement de la clé google : $_"
 }
 
 
